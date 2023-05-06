@@ -1,0 +1,42 @@
+#define BLYNK_PRINT Serial
+#include<ESP8266WiFi.h>
+#include<BlynkSimpleEsp8266.h>
+BlynkTimer timer;
+char auth[]="NgEdJeJWtlegMyPUb1Dm3zvIuKbxhSZf";
+char ssid[]="node";
+char pass[]="12345678";
+int flag=0;
+int relay = D2;
+int led = D4;
+int buzzer = D3;
+
+void notifyOnFire(){
+  int isButtonPressed=digitalRead(D1);
+  if(isButtonPressed== 1 && flag==0){
+    Serial.println("Flame detected...! take action immediately.");
+    Blynk.notify("Alert:Flame detected...! take action immediately.");
+    digitalWrite(relay, LOW);
+    digitalWrite(led, LOW);
+    digitalWrite(buzzer, LOW);
+    flag=1;
+  }
+  else if(isButtonPressed==0){
+    flag=0;
+    digitalWrite(relay, HIGH);
+    digitalWrite(led, HIGH);
+    digitalWrite(buzzer,HIGH);
+  }
+}
+void setup(){
+  Serial.begin(115200);
+  Blynk.begin(auth,ssid,pass);
+  pinMode(D1,INPUT_PULLUP);
+  pinMode(relay, OUTPUT);
+  pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  timer.setInterval(1000L,notifyOnFire);
+}
+void loop(){
+  Blynk.run();
+  timer.run();
+}
